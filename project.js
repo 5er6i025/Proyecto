@@ -1,11 +1,12 @@
 const { Pool } = require('pg');
 const express= require('express');
 const app=express();
-app.use(express.json())
+app.use(express.json());
 require('dotenv').config();
 const port=process.env.PORT;
 const multer=require('multer');
 const path=require('path');
+const {swaggerDocs} = require('./swagger');
 
 var nombre=''
 const destinationPath = path.join(__dirname, './uploads');
@@ -47,10 +48,11 @@ const apikeyvalidation=(req,res,next)=>{
 app.use(apikeyvalidation)
 
 app.listen(port, ()=>{
-    console.log('The app is running on port: ', port)
+    console.log('The app is running on port: ', port);
+    swaggerDocs(app, port);
 })
 
-
+//Este metodo lista todos los usuarios
 app.get('/users', function(req,resp){
     const listUsersQuery = `SELECT * FROM projectc;`;
     pool.query(listUsersQuery)
@@ -68,7 +70,7 @@ app.get('/users', function(req,resp){
     }) 
 })
 
-
+//Consulta usuarios por id
 app.get('/users/:id', function(req,resp){
             const id=req.params.id;
             const select = `SELECT *FROM projectc WHERE id='${id}';`;
@@ -86,6 +88,7 @@ app.get('/users/:id', function(req,resp){
             }) 
 })
 
+//Actualiza usuario por id
 app.put('/users/:id', function(req,resp){
     const id=req.params.id;
     const update = `UPDATE projectc SET Name='${req.body.name}', Numero_identificacion='${req.body.numero_identificacion}', Fecha_nacimiento='${req.body.fecha_nacimiento}',Imagen='${req.body.imagen}', Motivo_consulta='${req.body.motivo_consulta}', Diagnostico='${req.body.diagnostico}', Doctor='${req.body.doctor}', Fecha_consulta='${req.body.fecha_consulta}' WHERE id='${id}';`;
@@ -104,7 +107,7 @@ app.put('/users/:id', function(req,resp){
 })
 
 
-
+//Eliminar usuario por id
 app.delete('/users/:id', function(req,resp){
     const id=req.params.id;
     const Delete= `DELETE FROM projectc WHERE id='${id}';`;
@@ -124,7 +127,7 @@ app.delete('/users/:id', function(req,resp){
 
 
    
-
+//Inserta un nuevo usuario
 app.post('/users', function(req, resp){
     const insertar= `INSERT INTO projectc (Name, Numero_identificacion, fecha_nacimiento, Imagen, Motivo_consulta, Diagnostico, Doctor, Fecha_consulta) VALUES('${req.body.name}','${req.body.numero_identificacion}','${req.body.fecha_nacimiento}','${req.body.imagen}','${req.body.motivo_consulta}','${req.body.diagnostico}','${req.body.doctor}','${req.body.fecha_consulta}');`;
     pool.query(insertar)
@@ -140,6 +143,8 @@ app.post('/users', function(req, resp){
     })
 })
 
+
+//Actualiza el campo imagen de un usuario por id con la direccion del archivo que ingrese en el body del request
 app.put('/users/image/:id', upload.single('file'),(req,resp)=>{
     const id=req.params.id;
     const ruta=path.join(__dirname, './uploads',nombre)
@@ -158,3 +163,6 @@ app.put('/users/image/:id', upload.single('file'),(req,resp)=>{
     resp.send('Hubo un error al actualizar la informacion')
 }) 
 })
+
+//copiar metodos con comentarios y copearlos en Chatgpt: 'genera el lenguaje yml para la documentacion de Swagger para node.js'
+//luego decirle que siga el formato que envio el profe
